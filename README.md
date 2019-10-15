@@ -1,4 +1,2 @@
-#Shopware Installation Powered by Ansible
-Run:
+#TO BE NEEN INSTALLATION ANSIBLE
 
-`ansible-playbook provision.yml`
