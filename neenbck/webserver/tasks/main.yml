@@ -1,0 +1,12 @@
+---
+- name: Install Nginx
+  import_tasks: nginx.yml
+
+- name: Install PHP
+  import_tasks: php.yml
+
+- name: Create self signed certificate
+  import_tasks: certificate.yml
+
+- name: Add new virtualhost
+  import_tasks: virtualhost.yml

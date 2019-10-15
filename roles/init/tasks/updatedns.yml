@@ -1,0 +1,44 @@
+---
+- name: Get Floating IP
+  command: /usr/bin/curl --silent --connect-timeout 5 if.neen.do
+  changed_when: False
+  check_mode: no
+  register: floating_ip
+
+- uri:
+    url: 'https://neen.do/ws.php/servers/updatednsrecord'
+    method: POST
+    body_format: json
+    headers:
+        Accept: "application/json"
+    body: '{"zone":"{{ zonadns }}", "authcode":"{{authcode}}","hostname":"{{ server }}.{{ zonadns }}","recordtype":"{{ recordtype }}", "record":"{{ floating_ip }}"}'
+
+- file:
+    path: /neen/.neen.contacts.json
+    state: absent
+
+- file:
+    path: /neen/.neen.customer.json
+    state: absent
+
+- stat:
+    path: /etc/nginx/sites-enabled/000-default
+  register: has_nginx_default_site
+
+- lineinfile:
+    path: /etc/nginx/sites-enabled/000-default
+    regexp: '^(.*)server_name (.*)neen'
+    line: '        server_name "{{hostname}}"'
+  when: has_nginx_default_site.stat.exists 
+
+- lineinfile:
+    path: /etc/cloud/cloud.cfg.d/99-hostaname.cfg
+    regexp: '^hostname: (.*)'
+    line: 'hostname: {{ansible_hostname}}'
+    create: yes
+
+- lineinfile:
+    path: /etc/cloud/cloud.cfg.d/99-hostaname.cfg
+    regexp: '^fqdn: (.*)'
+    line: 'fqdn: {{ansible_fqdn}}'
+

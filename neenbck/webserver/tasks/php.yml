@@ -1,0 +1,86 @@
+---
+- name: Install mcrypt for php < 7.2
+  apt:
+    name: ['php{{phpversion}}-mcrypt']
+    state: present
+  when: phpversion < '7.2'
+
+- name: Install php-fpm.conf
+  template:
+    src: "php-fpm.conf.j2"
+    dest: "/etc/php/{{phpversion}}/fpm/php-fpm.conf"
+  when: ansible_os_family == 'Debian'
+
+- name: Install custom php pool
+  template:
+    src: "www.conf.j2"
+    dest: "/etc/php/{{phpversion}}/fpm/pool.d/www.conf"
+
+- name: Update OPCache PHP fpm config
+  replace:
+    dest: '/etc/php/{{phpversion}}/fpm/php.ini'
+    regexp: ";opcache.max_accelerated_files=10000"
+    replace: "opcache.max_accelerated_files=20000"
+  notify: restart php   
+
+- name: Update OPCache PHP cli config
+  replace:
+    dest: '/etc/php/{{phpversion}}/cli/php.ini'
+    regexp: ";opcache.max_accelerated_files=10000"
+    replace: "opcache.max_accelerated_files=20000"
+  notify: restart php   
+
+- name: Update OPCache PHP fpm config
+  replace:
+    dest: '/etc/php/{{phpversion}}/fpm/php.ini'
+    regexp: ";opcache.memory_consumption=128"
+    replace: "opcache.memory_consumption=256"
+  notify: restart php   
+
+- name: Update OPCache PHP cli config
+  replace:
+    dest: '/etc/php/{{phpversion}}/cli/php.ini'
+    regexp: ";opcache.memory_consumption=128"
+    replace: "opcache.memory_consumption=256"
+  notify: restart php  
+
+
+
+- name: Update APC PHP fpm config
+  blockinfile:
+    dest: '/etc/php/{{phpversion}}/fpm/php.ini'
+    block: | 
+      [apc]
+      apc.shm_size = 128M
+      apc.num_files_hint = 20000
+      apc.ttl = 86400
+      apc.user_ttl = 86400
+  notify: restart php   
+
+- name: Update APC PHP cli config
+  blockinfile:
+    dest: '/etc/php/{{phpversion}}/cli/php.ini'
+    block: | 
+      [apc]
+      apc.shm_size = 128M
+      apc.num_files_hint = 20000
+      apc.ttl = 86400
+      apc.user_ttl = 86400
+  notify: restart php   
+
+- name: Change PHP fpm memory limit
+  replace:
+    dest: '/etc/php/{{phpversion}}/fpm/php.ini'
+    regexp: "memory_limit = 128"
+    replace: "memory_limit = {{phpmemory}}"
+  notify: restart php   
+
+- name: Change PHP cli memory limit
+  replace:
+    dest:  '/etc/php/{{phpversion}}/cli/php.ini'
+    regexp: "memory_limit = 128"
+    replace: "memory_limit = {{phpmemory}}"
+  notify: restart php   
+
+- name: Change default shell php version
+  command: 'update-alternatives --set php /usr/bin/php{{phpversion}}'

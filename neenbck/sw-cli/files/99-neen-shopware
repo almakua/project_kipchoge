@@ -1,0 +1,3 @@
+# sudo permission to enable shopware user to verify and reload nginx configuration
+Cmnd_Alias NGINX_CTL = /usr/sbin/nginx -t, /usr/sbin/nginx -s reload
+shopware ALL = NOPASSWD: NGINX_CTL

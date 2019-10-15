@@ -1,0 +1,52 @@
+---
+- name: Add Ondrej PHP Repo
+  apt_repository:
+    repo: "ppa:ondrej/php"
+    update_cache: yes
+
+- name: Add Ondrej NGINX Stable Repo
+  apt_repository:
+    repo: 'ppa:ondrej/nginx'
+    state: present
+
+- name: Install PHP + NGINX packages
+  apt:
+    name: ['nginx', 'php{{phpversion}}-bcmath', 'php{{phpversion}}-common', 'php{{phpversion}}-curl', 'php{{phpversion}}-fpm', 
+'php{{phpversion}}-redis', 'php{{phpversion}}-gd', 'php{{phpversion}}-intl', 'php{{phpversion}}-mbstring', 'php{{phpversion}}-mysql', 'php{{phpversion}}-xml', 'php{{phpversion}}-xsl', 'php{{phpversion}}-soap', 'php{{phpversion}}-json', 'pwgen', 'php{{phpversion}}-zip', 'php{{phpversion}}-opcache', 'php-horde-icalendar', 'php-apcu', 'php-mysqlnd-ms' ]
+    state: present
+
+- name: Check Nginx configs exist
+  stat: path=/etc/nginx/.git
+  register: git_exists
+
+- name: Remove default Nginx configs
+  file:
+    path: /etc/nginx
+    state: absent
+  when: not git_exists.stat.exists
+
+- name: Clone Nginx configs
+  git:
+    repo: https://gitlab.e-one.it/neen-sys/shopwares-nginx-configuration
+    dest: /etc/nginx
+    version: master
+    force: yes
+  when: git_exists.stat.exists
+
+- name: Replace hostname in default config
+  replace:
+    dest: "/etc/nginx/sites-available/default.conf"
+    regexp: "HOSTNAME"
+    replace: "{{server}}.{{zonadns}}"
+
+- name: Create default www dir
+  file:
+    path: /var/www/01_default-site
+    state: directory
+    mode: '0775'
+
+- name: Link phpmyadmin
+  file:
+    src: /usr/share/phpmyadmin
+    dest: /var/www/01_default-site/neen_phpmyadmin
+    state: link

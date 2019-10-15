@@ -1,0 +1,34 @@
+---
+- name: Clone shopware cli tools repo
+  git:
+    repo: 'https://github.com/shopwareLabs/sw-cli-tools.git'
+    dest: /home/{{ lx_user }}/tools
+
+- name: Change ownership of tools directory
+  file:
+    path: /home/{{ lx_user }}/tools
+    state: directory
+    recurse: yes
+    owner: '{{ lx_user }}'
+    group: '{{ lx_user }}'
+
+- name: Run composer
+  composer:
+    command: install
+    working_dir: /home/{{ lx_user }}/tools
+  become: true
+  become_user: '{{ lx_user }}'
+
+- name: configure sudo for shopware
+  copy:
+    src: 99-neen-shopware 
+    dest: /etc/sudoers.d/99-neen-shopware
+    validate: /usr/sbin/visudo -cf %s
+
+- name: copy custom config for nginx shopware
+  copy: 
+    src: shopware-custom.conf
+    dest: /etc/nginx/conf.d/shopware-custom.conf
+    owner: shopware
+    group: shopware
+    mode: 0664

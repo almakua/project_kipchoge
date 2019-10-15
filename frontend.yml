@@ -1,0 +1,7 @@
+---
+- hosts: FE
+  user: "{{ neen_user }}"
+  become: yes
+  roles: 
+   - webserver
+   - sw-cli

@@ -1,0 +1,6 @@
+---
+# nginx variables
+ phpversion: '7.2'
+
+# PHP Memory limit
+ phpmemory: '1024'

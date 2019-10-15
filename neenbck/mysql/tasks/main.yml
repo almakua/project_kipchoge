@@ -1,0 +1,48 @@
+---
+- name: Install Mysql
+  apt:
+    name: ['mysql-server', 'mysql-client', 'mysql-utilities', 'python-mysqldb']
+    state: present
+    force: yes
+
+- name: Set root Password
+  mysql_user:
+      name: root
+      host: ['localhost', '127.0.0.1', '::1']
+      password: "{{ mysql_root_password }}"
+      login_user: root
+      login_password: "{{ mysql_root_password }}"
+      #      check_implicit_admin: yes
+      priv: "*.*:ALL,GRANT"
+
+- name: Add .my.cnf
+  template: src=my.cnf.j2 dest=/root/.my.cnf owner=root group=root mode=0600
+
+
+- name: Removes all anonymous user accounts
+  mysql_user:
+    name: ''
+    host_all: yes
+    state: absent
+
+- name: Create a new database with name {{dbname}}
+  mysql_db:
+    name: '{{dbname}}'
+    state: present
+
+- name: Create database user with name {{dbuser}} and password with all database privileges
+  mysql_user:
+    name: '{{dbuser}}'
+    password: '{{dbpassword}}'
+    priv: '{{dbname}}.*:ALL'
+    state: present
+
+- name: Config innodb buffer pool size
+  lineinfile:
+    path: /etc/mysql/mysql.conf.d/mysqld.cnf
+    line: 'innodb_buffer_pool_size = 4096M'
+
+- name: Restart service Mysql after config changes
+  service:
+    name: mysql
+    state: restarted

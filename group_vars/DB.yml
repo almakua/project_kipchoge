@@ -1,0 +1,6 @@
+---
+# mysql root password
+ mysql_root_password: 'JYrmpHMmwyxF5FHa'
+ dbname: 'shopware'
+ dbuser: 'shopware'
+ dbpassword: '7hAQdHSYgMMJ7Fwm'

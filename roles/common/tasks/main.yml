@@ -1,0 +1,92 @@
+---
+- name: Upgrade packages
+  apt: upgrade=safe
+  
+- name: Install packages
+  apt:
+    name: "{{ packages }}"
+    state: present
+    update_cache: yes
+  when: ansible_os_family == 'Debian'
+
+- name: Install packages
+  yum:
+    name: "{{ packages }}"
+    state: present
+    update_cache: yes
+  when: ansible_os_family == 'RedHat'
+
+#- name: install pexpect
+#  pip:
+#    name: pexpect
+
+- name: Update Hostname
+  hostname:
+    name: '{{ server }}.{{ zonadns }}'
+
+- name: add host to /etc/hosts
+  lineinfile:
+    dest: /etc/hosts
+    regexp: '^127\.0\.0\.1[ \t]+localhost'
+    line: '127.0.0.1 localhost {{ server }}.{{ zonadns }} {{ server }}'
+    state: present
+
+- name: generate locale
+  locale_gen:
+    name: en_US.UTF-8
+    state: present
+
+- name: set as default locale
+  command: localectl set-locale LANG=en_US.UTF-8
+
+- name: set Rome as Timezone
+  timezone:
+    name: Europe/Rome
+
+- name: Run timedatectl status
+  command: /usr/bin/timedatectl status
+  changed_when: False
+  check_mode: no
+  register: timedatectl_result
+
+- name: Enable ntp
+  command: /usr/bin/timedatectl set-ntp true
+  when: "'Network time on: no' in timedatectl_result.stdout"
+
+- name: Create Neen directory if it does not exist
+  file:
+    path: /neen
+    state: directory
+    mode: '0755'
+
+- name: Clone NeenOSInstall repo
+  git:
+    repo: http://gitlab.e-one.it/neen-sys/neenosinstall.git 
+    dest: /neen/neenosinstall
+
+- name: Clone Neen Ansible repo
+  git:
+    repo: http://gitlab.e-one.it/neen-sys/ansible.git
+    dest: /neen/ansible
+
+- name: Clone Neen Tools repo
+  git:
+    repo: http://gitlab.e-one.it/neen-sys/tools.git
+    dest: /neen/tools
+
+- name: Create neenosinstall symbolic link
+  file:
+    src: /neen/neenosinstall/neenosinstall
+    dest: /usr/bin/neenosinstall
+    owner: root
+    group: root
+    state: link
+
+- name: Create {{ lx_user }} user
+  user:
+    name: "{{ lx_user }}"
+    password: "{{ lx_password  | password_hash('sha512', 'mysecretsalt')  }}"
+    shell: /bin/bash
+    update_password: always
+    state: present
+    

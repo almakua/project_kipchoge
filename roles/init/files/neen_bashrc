@@ -1,0 +1,77 @@
+#Se non è login interattivo, esci
+[ -z "$PS1" ] && return
+
+# COLORI
+#------------------------------------------////
+red='\e[0;31m'
+orange='\e[0;33m'
+darkgray='\e[1;30m'
+b=`tput bold`
+n=`tput sgr0`
+alias ls='ls --color=auto'
+alias ll='ls -l'
+alias la='ls -A'
+alias l='ls -CF'
+force_color_prompt=yes
+#-----------------------------------------////
+
+#FUNZIONI
+neen_logo() {
+echo -e "${orange}"
+echo -e "   ____  ___  ___  ____ "
+echo -e "  |  _ \/ _ \/ _ \/ _  |"
+echo -e "  | | |   __/  __  | | |"
+echo -e "  |_| |_\___|\___|_| |_|"
+echo -e "${b} High-Perfomance Hosting${n} "
+echo ""
+}
+
+neen_sysinformation() {
+echo -e "${b}Hostname:${n} `hostname -f` \t ${b}IP address:${n} `ip addr | perl -nle '/[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}/ and print $&' | grep -v 127.0.0.1 | paste -sd ","`"
+echo -e "${b}CPU load:${n} `cat /proc/loadavg | cut -d" " -f1-3`"
+echo -e "${b}Uptime:${n} `uptime | cut -d" " -f 4-7 | cut -d"," -f1-2`"
+echo -e "${b}Free memory${n}: `cat /proc/meminfo | grep MemFree | awk {'print int($2/1000)'}` MB \t\t\t ${b}Total memory:${n} `cat /proc/meminfo | grep MemTotal | awk {'print int($2/1000)'}` MB"
+echo -e "${b}Running Process:${n} `cat /proc/loadavg | cut -d"/" -f2| cut -d" " -f1`\n"
+echo -e "${b}Active sessions:${n}" 
+w | tail -n +2
+echo ""
+}
+
+#Specifico per Ubuntu
+if [ ! -f ~/.hushlogin ]; then
+	touch ~/.hushlogin
+fi
+
+###########################   Parte output : 
+neen_logo
+neen_sysinformation
+
+## Note ##############################################
+#Note neendo
+echo -e "${red}Notes :${n}"
+neenosinstall -rn
+echo ""
+echo -e "${red}Infrastructure notes :${n}"
+
+##########################################Check Panel
+#Virtualmin
+if nc -zv -w30 127.0.0.1 10000 >/dev/null 2>&1
+then
+        echo "Virtualmin is enabled on this server"
+fi
+#Zend
+if nc -zv -w30 127.0.0.1 10081 >/dev/null 2>&1
+then
+        echo "Zend Server is enabled on this server"
+fi
+#Plesk
+if nc -zv -w30 127.0.0.1 8443 >/dev/null 2>&1
+then
+        echo "Plesk is enabled on this server"
+fi
+
+#Formato data history neen
+export HISTTIMEFORMAT="%h/%d - %H:%M:%S "
+
+#Custom PS1 neen
+export PS1="\e[0;33m|neen|\\[$(tput bold)\]\[\033[38;5;1m\]\H\[$(tput sgr0)\]\[$(tput sgr0)\]\[\033[38;5;15m\] \A {\[$(tput sgr0)\]\[\033[38;5;243m\]\u\[$(tput sgr0)\]\[\033[38;5;15m\]} \n\[$(tput sgr0)\]\[\033[38;5;68m\]\w\[$(tput sgr0)\]\[\033[38;5;15m\] \\$\[$(tput sgr0)\] "

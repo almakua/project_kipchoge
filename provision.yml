@@ -1,0 +1,9 @@
+---
+# this is the top playbook. It will handle all the specific playbooks
+
+- import_playbook: start.yml
+- import_playbook: frontend.yml
+- import_playbook: database.yml
+- import_playbook: loadbalancer.yml
+- import_playbook: cache.yml
+- import_playbook: admin.yml

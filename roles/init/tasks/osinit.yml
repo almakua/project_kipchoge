@@ -1,0 +1,69 @@
+---
+- name: Install Ubuntu specific packages
+  apt:
+    name: "{{ debs }}"
+    state: present
+    update_cache: yes
+  when: ansible_os_family == 'Debian'
+
+- name: Install RHEL specific packages
+  apt:
+    name: "{{ rpms }}"
+    state: present
+    update_cache: yes
+  when: ansible_os_family == 'RedHat'
+
+- name: Installing neen bashrc
+  copy:
+    src: neen_bashrc
+    dest: /etc/profile.d/neen_bashrc.sh
+    owner: root
+    group: root
+    mode: 0777
+    force: yes
+
+- name: Hardening SSH for Debian
+  lineinfile: dest=/etc/ssh/sshd_config 
+              regexp="^PasswordAuthentication no"
+              line="PasswordAuthentication yes" 
+
+- name: enabling password login
+  lineinfile: dest=/etc/ssh/sshd_config 
+              regexp="^PermitRootLogin yes"
+              line="PermitRootLogin without-password" 
+
+- name: Remove Authorized Key directive
+  lineinfile: dest=/etc/ssh/sshd_config 
+              regexp="^AuthorizedKeysFile    .ssh/authorized_keys"
+              line="#AuthorizedKeysFile    .ssh/authorized_keys" 
+  when: ansible_os_family == 'RedHat'
+
+- name: Reload ssh RedHat
+  service: name=sshd
+           state=reloaded
+  when: ansible_os_family == 'RedHat'
+
+- name: Reload ssh Debian
+  service: name=ssh
+           state=reloaded
+  when: ansible_os_family == 'Debian'
+
+- name: "Tuning fs.file-max"
+  sysctl:
+    name:  fs.file-max
+    value:  "360000"
+    state:  present
+  when: (ansible_os_family == 'Debian' and ansible_distribution_version != "12.04")
+
+- name:  "Tuning sysctl: net.core.somaxconn"
+  sysctl:
+    name:  net.core.somaxconn
+    value:  "65000"
+    state:  present
+  when: (ansible_os_family == 'Debian' and ansible_distribution_version != "12.04")
+
+- name:  "Tuning sysctl: vm.overcommit_memory"
+  sysctl:
+    name:  vm.overcommit_memory
+    value:  "1"
+    state:  present

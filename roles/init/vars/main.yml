@@ -1,0 +1,12 @@
+---
+# default packages list 
+ packages: ['python', 'git', 'python-pip', 'facter', 'software-properties-common', 'ansible', 'pwgen', 'puppet', 'nmap', 'traceroute', 'htop', 'ntp', 'mc', 'vim', 'postfix', 'sysstat', 'iptraf', 'tcpdump', 'subversion', 'telnet', 'fail2ban', 'byobu', 'nscd', 'git', 'autoconf', 'etckeeper', 'curl', 'pwgen', 'phpmyadmin', 'composer', 'pngcrush']
+
+# packages debian
+ debs: [ 'makepasswd', 'mailutils', 'build-essential', 'ipcalc', 'rpl', 'apticron', 'dh-make', 'apt-dater-host', 'unattended-upgrades', 'libcache-cache-perl', 'bmon', 'python-httplib2', 'jpegoptim' ]
+
+# rhel packages
+ rpms: [ '@Development Tools', 'glibc-common', 'nrpe'  , 'mailx', 'initscripts', 'MySQL-python', 'expect' ]
+
+# etckeeper files
+ etckeeper_files: [ 'etckeeper-commit-pre', 'etckeeper-commit-post', 'puppet.conf' ]

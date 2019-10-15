@@ -1,0 +1,40 @@
+---
+- name: Install PuppetLabs release RPM for Fedora or EL derivatives
+  yum: name="{{ item }}.noarch.rpm" state={{ puppet_release_package_state }}
+  with_items:
+    - "{{ puppet_release_rpm_baseurl }}/puppetlabs-release-{% if ansible_distribution == 'Fedora' %}fedora{% else %}el{% endif %}-{{ ansible_distribution_version.split('.')[0] }}"
+  when: ansible_os_family == 'RedHat'
+
+- name: Install etckeeper-commit-pre/post puppet.conf
+  copy:
+    src: "{{ etckeeper_files }}"
+    dest: "/etc/puppet/{{item}}"
+    mode: 0775
+
+- name: PUPPET | Stop service
+  service: name=puppet enabled=yes state=stopped
+
+- name: PUPPET | Enable Agent
+  command: puppet agent --enable
+
+- name: PUPPET | Run first alignment
+  command: puppet agent -t
+  ignore_errors: yes
+
+- name: PUPPET | Run second alignment
+  command: puppet agent -t
+  ignore_errors: yes
+
+- name: PUPPET | Run third alignment
+  command: puppet agent -t
+  ignore_errors: yes
+
+- name: PUPPET | Run fourth alignment
+  command: puppet agent -t
+  ignore_errors: yes
+
+- name: PUPPET | Run fifth alignment
+  command: puppet agent -t
+
+- name: PUPPET | Start service
+  service: name=puppet enabled=yes state=started

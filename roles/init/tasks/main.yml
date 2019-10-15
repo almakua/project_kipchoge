@@ -1,0 +1,14 @@
+---
+- name: Configure DNS
+  import_tasks: updatedns.yml
+
+- name: Operative System Initialization
+  import_tasks: osinit.yml
+
+- stat: path=/etc/puppet/etckeeper-commit-pre
+  register: file_exists
+
+- name: Configure puppet
+  import_tasks: puppetinstall.yml
+  when: not file_exists.stat.exists
+

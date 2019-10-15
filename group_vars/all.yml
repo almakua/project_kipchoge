@@ -1,0 +1,16 @@
+---
+# user with which ansible will connect to the server
+ neen_user: "n3556"
+
+# 
+ lx_user: 'shopware'
+ lx_password: '4QFgqUQrNEdaXeRW'
+
+# dns variables
+ server: "c000092spw00"
+ zonadns: "neen.cloud"
+ authcode: "1371863576699286"
+ recordtype: "A"
+
+# url of the site
+ site_url: shopware.test

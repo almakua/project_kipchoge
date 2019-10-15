@@ -1,0 +1,11 @@
+# Add hosts here, one per line. Additional groups can be created using
+# [group] syntax. Hosts can join multiple groups.
+
+[FE]
+c000092spw00.neen.cloud
+
+[DB]
+c000092spw00.neen.cloud
+
+[LB]
+c000092spw00.neen.cloud

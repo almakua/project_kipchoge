@@ -1,0 +1,6 @@
+---
+- hosts: DB
+  user: "{{ neen_user }}"
+  become: yes
+  roles: 
+   - mysql

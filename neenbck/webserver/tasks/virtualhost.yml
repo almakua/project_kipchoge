@@ -1,0 +1,35 @@
+---
+- name: check if virtualhost exists
+  stat: 
+    path: /etc/nginx/sites-available/{{ site_url }}.conf
+  register: virtualhost_status
+
+
+- name: Create {{ site_url }} conf from example.com
+  copy:
+    src: /etc/nginx/sites-available/example.com.conf
+    dest: /etc/nginx/sites-available/{{ site_url }}.conf
+    remote_src: yes
+
+- name: Replace example.com with {{ site_url }} in virtualhost configuration
+  replace:
+    dest: "/etc/nginx/sites-available/{{ site_url }}.conf"
+    regexp: "example.com"
+    replace: "{{ site_url }}"
+
+
+- name: Symlink new site
+  file: 
+    src: /etc/nginx/sites-available/{{ site_url }}.conf
+    dest: /etc/nginx/sites-enabled/{{ site_url }}.conf
+    state: link
+  notify: reload nginx    
+
+
+- name: Set Nginx user
+  lineinfile: 
+    dest: /etc/nginx/nginx.conf
+    regexp: "^user"
+    line: "user {{ lx_user }};"
+    state: present
+  notify: restart nginx
